@@ -39,11 +39,11 @@ fn install(conf: &CargoConfig, paths: &[&Path]) -> Result<()> {
         fs::copy(&path, sink)?;
     }
 
-    show_help(sink_dir);
+    show_help(&sink_dir);
     Ok(())
 }
 
-fn show_help(path: PathBuf) {
+fn show_help(path: &PathBuf) {
     let msg = r#"
 Install completed!!
 Restart of the hain is required.
@@ -81,7 +81,10 @@ fn application_config(cargo_conf: &CargoConfig) -> Result<PathBuf> {
 
     let mut path = match (local, user) {
         (Some(l), _) => PathBuf::from(l),
-        (None, Some(u)) => PathBuf::from(format!("{}/Local Settings/Application Data", u.to_str().unwrap())),
+        (None, Some(u)) => PathBuf::from(format!(
+            "{}/Local Settings/Application Data",
+            u.to_str().unwrap()
+        )),
         _ => bail!("Notfound home dir"),
     };
     path.push("hain-user/devplugins");
