@@ -20,6 +20,7 @@ before_install:
 
 install:
   - source ~/.cargo/env
+  - cargo install --force cross
 
 script:
   - cross test --target $TARGET --release
