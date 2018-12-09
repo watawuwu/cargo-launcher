@@ -1,0 +1,14 @@
+{
+  "name": "hain-plugin-{{name}}",
+  "author": "{{author}}",
+  "version": "{{version}}",
+  "keywords": [
+    "hain-0.6.0"
+  ],
+  "hain": {
+    "prefix": "/{{name}}",
+    "usage": "type /{{name}} {{description}}",
+    "icon": "icon.png",
+    "redirect": "/{{name}} "
+  }
+}

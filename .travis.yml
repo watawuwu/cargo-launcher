@@ -1,0 +1,51 @@
+dist: trusty
+language: rust
+services: docker
+rust:
+  - beta
+sudo: required
+env:
+  global:
+    - NAME=cargo-launcher
+
+matrix:
+  include:
+    - env: TARGET=x86_64-unknown-linux-musl
+    - env: TARGET=x86_64-apple-darwin
+      os: osx
+    - env: TARGET=x86_64-pc-windows-gnu
+
+before_install:
+  - rustup self update
+
+install:
+  - source ~/.cargo/env
+
+script:
+  - cross test --target $TARGET --release
+
+before_deploy:
+  - cross build --target $TARGET --release
+  - bin=$NAME
+  - if [[ $TARGET = "x86_64-pc-windows-gnu" ]]; then bin=$NAME.exe; fi
+  - tar czf $NAME-$TRAVIS_TAG-$TARGET.tar.gz -C target/$TARGET/release $bin
+
+deploy:
+  api_key:
+    secure: "D0c0hOy8ia+kl5TiNwDV1HlgAMmzlXAXmEc3JEpUDbUbzXxSe68ReP3fZHBZLE8pZGkPnVcqWv6HAmh8AEGucNH5RVsmKcn6e2v1aJe0qQYWEFsloEEw0u+myNqNgs9+ODforzUvmg4CA/iPGXYHilj8BzHr898Z45Vl/OBqH8JnJhj9R16fs0X7+fWlVCXdL3DI7qsjq4Rd2oEbktzZiGVLJYx1Yvyia0sLIH4WTdqbOM/RQkPtQvgQnLDM0dOROK4wBaavIPaykerbE2c4++N8v7pbeY2zfF4RRM7waaYxCGPMzuCFsoPe/up1KpOTTUTT+EJEsNKj1TTsyn5u1O40ICqoAR3HY7Z6iXnjnsJOSma8PkMjnE9+Dgw0ImsyRuFCfTXzIEqUE9hlpABH1r0GkgS0S8MjWVPuyjEqCgOWUDjm0/0zO1P0/C7xtY2bcwe8wXCANQNnueK+Ne/IFN1ce2lfQ6UJ6fjvufRipydxwKlKbvkpAqY5hRYEi89VdaA2AZtNaIveUDS83pXfkS631xOKqLit7/OafCg+Kk+6AKCY8s0LNflMnpI76dBJSqr3/nqUE5z1EIBlpqWxUt5fle/UklRzBaebs1aOr3PmPHiEem63cHS+OGWg7beI2cIhHc7lQmL8VU2Ox38UZjPOjS4lW/AKG4isaX4Wbzc="
+  file_glob: true
+  file: $NAME-$TRAVIS_TAG-$TARGET.*
+  on:
+    tags: true
+  provider: releases
+  skip_cleanup: true
+
+cache: cargo
+before_cache:
+  - chmod -R a+r $HOME/.cargo
+
+branches:
+  only:
+    # for release tags
+    - /^v?\d+\.\d+\.\d+.*$/
+    - master
