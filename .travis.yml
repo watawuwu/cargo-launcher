@@ -2,7 +2,7 @@ dist: trusty
 language: rust
 services: docker
 rust:
-  - beta
+  - stable
 sudo: required
 env:
   global:
