@@ -83,7 +83,7 @@
 				<key>script</key>
 				<string>query="{query}"
 
-export PATH=$PATH:/usr/local/bin:$PATH:$HOME/.local/bin
+export PATH=$HOME/.cargo/bin:$HOME/.local/bin:/usr/local/bin:$PATH
 
 if [[ -z $query ]]
 then

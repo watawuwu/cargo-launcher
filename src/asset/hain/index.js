@@ -8,7 +8,7 @@ module.exports = (pluginContext) => {
   const logger = pluginContext.logger;
 
   function startup() {
-    process.env.PATH = "/usr/local/bin:~/.local/bin:" + process.env.PATH;
+    process.env.PATH = "~/.cargo/bin:~/.local/bin:/usr/local/bin:" + process.env.PATH;
   }
 
   function search(query, res) {

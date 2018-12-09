@@ -33,8 +33,8 @@ pub fn run(cargo_conf: &CargoConfig, launcher_conf: &LauncherConfig) -> Result<(
 }
 
 #[cfg(not(target_os = "macos"))]
-pub fn run(config: &CargoConfig, work_path: &PathBuf) -> Result<()> {
-    bail!("Alfred supported only macOS")
+pub fn run(cargo_conf: &CargoConfig, launcher_conf: &LauncherConfig) -> Result<()> {
+    failure::bail!("Alfred supported only macOS")
 }
 
 // TODO Install workflow via CUI or apple script.
