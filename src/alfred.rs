@@ -1,15 +1,23 @@
+#[cfg(target_os = "macos")]
 use std::fs::File;
+#[cfg(target_os = "macos")]
 use std::io::Write;
+#[cfg(target_os = "macos")]
 use std::path::{Path, PathBuf};
+#[cfg(target_os = "macos")]
 use zip::write::{FileOptions, ZipWriter};
 
 use crate::cargo::CargoConfig;
+#[cfg(target_os = "macos")]
 use crate::core::*;
 use crate::error::Result;
 use crate::launcher::LauncherConfig;
+#[cfg(target_os = "macos")]
 use crate::tpl::{self, Param};
 
+#[cfg(target_os = "macos")]
 const INFO_PLIST: &[u8] = include_bytes!("asset/alfred/info.plist");
+#[cfg(target_os = "macos")]
 const EXTENSION: &str = "alfredworkflow";
 
 #[cfg(target_os = "macos")]
@@ -47,11 +55,13 @@ fn install(paths: &[&Path]) -> Result<()> {
     Ok(())
 }
 
+#[cfg(target_os = "macos")]
 fn workflow_path(file_name: &str, dir_path: &PathBuf) -> PathBuf {
     let path = dir_path.to_str().unwrap_or("");
     PathBuf::from(format!("{}/{}.{}", path, file_name, EXTENSION))
 }
 
+#[cfg(target_os = "macos")]
 fn info_plist(config: &CargoConfig) -> Result<String> {
     let mut params = Param::new();
     params.insert("name", config.name());
@@ -63,4 +73,9 @@ fn info_plist(config: &CargoConfig) -> Result<String> {
     let info_plist = tpl::render(&tpl, &params)?;
 
     Ok(info_plist)
+}
+
+#[cfg(not(target_os = "macos"))]
+pub fn run(_cargo_conf: &CargoConfig, _launcher_conf: &LauncherConfig) -> Result<()> {
+    failure::bail!("Alfred supported only macOS")
 }

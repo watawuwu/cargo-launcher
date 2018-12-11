@@ -31,6 +31,7 @@ impl CargoConfig {
             .unwrap_or_else(|| String::from(""))
     }
 
+    #[cfg(target_os = "macos")]
     pub fn build_id(&self) -> String {
         format!("{}-{}", self.name(), hash(self.name()))
     }
