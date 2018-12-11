@@ -33,14 +33,6 @@ check: ## Check syntax, but don't build object files
 build: lint ## Build all project
 	$(CARGO_COMMAND) build $(CARGO_SUB_OPTIONS)
 
-release-build: lint ## Build all project
-	$(MAKE) build CARGO_SUB_OPTIONS="--release"
-
-cross-build: ## Build all platform
-	$(MAKE) build CARGO_SUB_OPTIONS="--target x86_64-apple-darwin       --release"
-	$(MAKE) build CARGO_SUB_OPTIONS="--target x86_64-pc-windows-gnu     --release"
-	$(MAKE) build CARGO_SUB_OPTIONS="--target x86_64-unknown-linux-musl --release" CROSS_COMPILE="x86_64-linux-musl-"
-
 update: ## Update modules
 	$(CARGO_COMMAND) update
 
@@ -60,6 +52,19 @@ clippy: ## Run clippy
 	$(CARGO_COMMAND) clippy
 
 lint: fmt clippy ## Run fmt and clippy
+
+release-build: lint ## Build all project
+	$(MAKE) build CARGO_SUB_OPTIONS="--release"
+
+cross-build: ## Build all platform
+	-$(MAKE) build CARGO_SUB_OPTIONS="--target x86_64-apple-darwin       --release"
+	-$(MAKE) build CARGO_SUB_OPTIONS="--target x86_64-pc-windows-gnu     --release"
+	-$(MAKE) build CARGO_SUB_OPTIONS="--target x86_64-unknown-linux-musl --release" CROSS_COMPILE="x86_64-linux-musl-"
+
+cross-test: ## Build all platform
+	-$(MAKE) test CARGO_SUB_OPTIONS="--target x86_64-apple-darwin       --release"
+	-$(MAKE) test CARGO_SUB_OPTIONS="--target x86_64-pc-windows-gnu     --release"
+	-$(MAKE) test CARGO_SUB_OPTIONS="--target x86_64-unknown-linux-musl --release" CROSS_COMPILE="x86_64-linux-musl-"
 
 help: ## Print help
 	echo -e "Usage: make [task]\n\nTasks:"
