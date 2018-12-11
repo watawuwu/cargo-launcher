@@ -3,6 +3,7 @@
 const exec = require('child_process').exec;
 
 module.exports = (pluginContext) => {
+  const app = pluginContext.app;
   const toast = pluginContext.toast;
   const clipboard = pluginContext.clipboard;
   const logger = pluginContext.logger;
@@ -32,6 +33,10 @@ module.exports = (pluginContext) => {
     if (id === 'ok') {
       clipboard.writeText(payload).then((result) => {
         toast.enqueue(`Added to clipboard: ${payload}`);
+        // TODO workaround...
+        setTimeout(() => {
+          app.close();
+        }, 1000);
       });
     }
   }
