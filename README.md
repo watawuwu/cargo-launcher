@@ -9,7 +9,6 @@ If the cargo project is a binary crates, this tool can register the binary in th
 - [Hain](https://hainproject.github.io/hain/docs/)
     - Register as devplugin
 
-
 ## TODO
 - [ ] cargo workspace(Only single binary crates)
 - [ ] customize launcher scripts
@@ -22,7 +21,8 @@ If the cargo project is a binary crates, this tool can register the binary in th
 $ cd {your binary crates project}
 
 # Install to local, or manually install
-# PATH=$HOME/.cargo/bin:$HOME/.local/bin:/usr/local/bin:$PATH
+#   The script path is set as follows
+#   PATH=$HOME/.cargo/bin:$HOME/.local/bin:/usr/local/bin:$PATH
 $ cargo install --path .
 ...
   Installing /Users/watawuwu/.cargo/bin/{your-binary}
@@ -43,7 +43,8 @@ $ cargo launcher alfred
 $ cd {your binary crates project}
 
 # Install to local, or manually install
-# PATH=$HOME/.cargo/bin:$HOME/.local/bin:/usr/local/bin:$PATH
+#   The script path is set as follows
+#   PATH=$HOME/.cargo/bin:$HOME/.local/bin:/usr/local/bin:$PATH
 $ cargo install --path .
 ...
   Installing /Users/watawuwu/.cargo/bin/{your-binary}
