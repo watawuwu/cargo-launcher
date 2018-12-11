@@ -3,9 +3,8 @@ mod args;
 mod cargo;
 mod core;
 mod error;
-mod file;
+mod fs;
 mod hain;
-mod io;
 mod launcher;
 mod tpl;
 
@@ -25,7 +24,7 @@ fn main() -> Result<()> {
     pretty_env_logger::init();
     let args = args();
     debug!("args: {:?}", args);
-    let config = config()?;
+    let config = config(&None)?;
 
     match launch(&args, &config) {
         Ok(_) => exit(SUCCESS_CODE),
