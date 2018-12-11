@@ -77,6 +77,6 @@ fn info_plist(config: &CargoConfig) -> Result<String> {
 }
 
 #[cfg(not(target_os = "macos"))]
-pub fn run(_cargo_conf: &CargoConfig, _launcher_conf: &LauncherConfig) -> Result<()> {
+pub fn install(_cargo_conf: &CargoConfig, _launcher_conf: &LauncherConfig) -> Result<()> {
     failure::bail!("Alfred supported only macOS")
 }
