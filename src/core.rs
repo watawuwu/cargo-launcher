@@ -22,6 +22,7 @@ pub fn hash(input: &str) -> u64 {
 }
 
 #[cfg(test)]
+#[cfg(not(target_os = "windows"))]
 mod tests {
 
     use crate::core::*;

@@ -76,6 +76,7 @@ pub fn config(opt_path: &Option<PathBuf>) -> Result<CargoConfig> {
 }
 
 #[cfg(test)]
+#[cfg(not(target_os = "windows"))]
 mod tests {
 
     use crate::cargo::*;
