@@ -27,6 +27,7 @@ mod tests {
     use crate::core::*;
 
     #[test]
+    #[cfg(target_os = "macos")]
     fn hash_bore_ok() {
         let args = "test";
         let expected = 16183295663280961421u64;

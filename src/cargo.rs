@@ -120,6 +120,7 @@ readme      = "README.md"
         assert_eq!(cargo.version(), "0.1.0");
         assert_eq!(cargo.description(), "Test description");
         assert_eq!(cargo.author(), "mozilla, watawuwu");
+        #[cfg(target_os = "macos")]
         assert_eq!(cargo.build_id(), "test-cargo-5484037434785666097");
         assert!(cargo.icon_path().is_none());
     }
