@@ -29,7 +29,7 @@ run: ## Execute a main.rs
 	$(CARGO_COMMAND) run $(CARGO_SUB_OPTIONS) $(APP_ARGS)
 
 test: lint ## Run the tests
-	$(CARGO_COMMAND) test $(CARGO_SUB_OPTIONS)
+	$(CARGO_COMMAND) test $(CARGO_SUB_OPTIONS) -- --nocapture
 
 check: ## Check syntax, but don't build object files
 	$(CARGO_COMMAND) check $(CARGO_SUB_OPTIONS)
