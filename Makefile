@@ -40,6 +40,11 @@ build: lint ## Build all project
 release-build: lint ## Build all project
 	$(MAKE) build CARGO_SUB_OPTIONS="--release"
 
+cross-build: ## Build all platform
+	$(MAKE) build CARGO_SUB_OPTIONS="--target x86_64-apple-darwin       --release"
+	$(MAKE) build CARGO_SUB_OPTIONS="--target x86_64-pc-windows-gnu     --release"
+	$(MAKE) build CARGO_SUB_OPTIONS="--target x86_64-unknown-linux-musl --release" CROSS_COMPILE="x86_64-linux-musl-"
+
 update: ## Update modules
 	$(CARGO_COMMAND) update
 
