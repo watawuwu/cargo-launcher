@@ -20,3 +20,42 @@ pub fn hash(input: &str) -> u64 {
     hasher.write(input.as_bytes());
     hasher.finish()
 }
+
+#[cfg(test)]
+mod tests {
+
+    use crate::core::*;
+
+    #[test]
+    fn hash_bore_ok() {
+        let args = "test";
+        let expected = 16183295663280961421u64;
+        let actual = hash(args);
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn command_echo_ok() {
+        let cmd = "echo";
+        let args = vec!["-n", "test"];
+        let expected = "test";
+        let actual = command(cmd, Some(args)).unwrap();
+
+        assert_eq!(expected, actual.as_str());
+    }
+
+    #[test]
+    fn command_none_args_ok() {
+        let cmd = "echo";
+        let actual = command(cmd, None);
+        assert!(actual.is_ok());
+    }
+
+    #[test]
+    fn command_invalid_cmd_ng() {
+        let cmd = "ls";
+        let actual = command(cmd, None);
+        assert!(actual.is_ok());
+    }
+}
