@@ -9,6 +9,11 @@ If the cargo project is a binary crates, this tool can register the binary in th
 - [Hain](https://hainproject.github.io/hain/docs/)
     - Register as devplugin
 
+
+## TODO
+- [ ] cargo workspace(Only single binary crates)
+- [ ] customize launcher scripts
+
 ## Usage
 
 ### Alfred workflow
