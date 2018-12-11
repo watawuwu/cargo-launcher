@@ -6,7 +6,7 @@ _name := cargo-launcher
 #===============================================================
 SHELL                   := /bin/bash
 LOG_LEVEL               := debug
-PREFIX                  := /usr/local/bin
+PREFIX                  := $(HOME)/.cargo
 LOG                     := $(shell echo '$(_name)' | tr - _)=$(LOG_LEVEL)
 CARGO_VERSION           := stable
 CARGO_OPTIONS           :=
@@ -18,10 +18,6 @@ APP_ARGS                := launcher hain
 #===============================================================
 export RUST_LOG=$(LOG)
 export RUST_BACKTRACE=1
-
-# Target
-#===============================================================
-./target/release/$(_name): release-build
 
 # Task
 #===============================================================
@@ -54,8 +50,8 @@ check-dep: ## Check dep version
 clean: ## Remove the target directory
 	$(CARGO_COMMAND) clean
 
-install: ./target/release/$(_name) ## Install to $(PREFIX) directory
-	install -m 755 ./target/release/$(_name) $(PREFIX)
+install: ## Install to $(PREFIX) directory
+	$(CARGO_COMMAND) install --force --root $(PREFIX) --path .
 
 fmt: ## Run fmt
 	$(CARGO_COMMAND) fmt
