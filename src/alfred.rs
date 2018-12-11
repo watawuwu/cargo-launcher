@@ -21,7 +21,14 @@ const INFO_PLIST: &[u8] = include_bytes!("asset/alfred/info.plist");
 const EXTENSION: &str = "alfredworkflow";
 
 #[cfg(target_os = "macos")]
-pub fn run(cargo_conf: &CargoConfig, launcher_conf: &LauncherConfig) -> Result<()> {
+pub fn install(cargo_conf: &CargoConfig, launcher_conf: &LauncherConfig) -> Result<()> {
+    let workflow_path = make(cargo_conf, launcher_conf)?;
+    open(&[workflow_path.as_ref()])?;
+    Ok(())
+}
+
+#[cfg(target_os = "macos")]
+fn make(cargo_conf: &CargoConfig, launcher_conf: &LauncherConfig) -> Result<PathBuf> {
     let workflow_path = workflow_path(cargo_conf.name(), &launcher_conf.work_dir);
     let zip = File::create(&workflow_path)?;
     let mut writer = ZipWriter::new(zip);
@@ -35,18 +42,12 @@ pub fn run(cargo_conf: &CargoConfig, launcher_conf: &LauncherConfig) -> Result<(
     writer.write_all(&launcher_conf.icon(cargo_conf)?)?;
 
     writer.finish()?;
-
-    install(&[workflow_path.as_ref()])?;
-    Ok(())
-}
-
-#[cfg(not(target_os = "macos"))]
-pub fn run(cargo_conf: &CargoConfig, launcher_conf: &LauncherConfig) -> Result<()> {
-    failure::bail!("Alfred supported only macOS")
+    Ok(workflow_path)
 }
 
 // TODO Install workflow via CUI or apple script.
-fn install(paths: &[&Path]) -> Result<()> {
+#[cfg(target_os = "macos")]
+fn open(paths: &[&Path]) -> Result<()> {
     let args = paths
         .iter()
         .map(|f| f.to_str().unwrap_or(""))

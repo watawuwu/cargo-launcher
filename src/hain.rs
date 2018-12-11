@@ -2,18 +2,24 @@ use dirs;
 use failure::*;
 use log::*;
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use crate::cargo::CargoConfig;
 use crate::error::Result;
-use crate::io::write_file;
+use crate::fs::write_file;
 use crate::launcher::LauncherConfig;
 use crate::tpl::{self, Param};
 
 const INDEX_JS_BIN: &[u8] = include_bytes!("asset/hain/index.js");
 const PACKAGE_JSON_BIN: &[u8] = include_bytes!("asset/hain/package.json");
 
-pub fn run(cargo_conf: &CargoConfig, launch_conf: &LauncherConfig) -> Result<()> {
+pub fn install(cargo_conf: &CargoConfig, launch_conf: &LauncherConfig) -> Result<()> {
+    let paths = make(cargo_conf, launch_conf)?;
+    copy(cargo_conf, paths)?;
+    Ok(())
+}
+
+pub fn make(cargo_conf: &CargoConfig, launch_conf: &LauncherConfig) -> Result<Vec<PathBuf>> {
     let index = index_js_path(&launch_conf.work_dir)?;
     write_file(&index, index_js(cargo_conf)?.as_bytes())?;
 
@@ -21,13 +27,12 @@ pub fn run(cargo_conf: &CargoConfig, launch_conf: &LauncherConfig) -> Result<()>
     write_file(&package, package_json(cargo_conf)?.as_bytes())?;
 
     let icon = icon_path(&launch_conf.work_dir)?;
-    write_file(&icon, launch_conf.icon_bin)?;
+    write_file(&icon, &launch_conf.icon(cargo_conf)?[..])?;
 
-    install(cargo_conf, &[&index, &package, &icon])?;
-    Ok(())
+    Ok(vec![index, package, icon])
 }
 
-fn install(conf: &CargoConfig, paths: &[&Path]) -> Result<()> {
+fn copy(conf: &CargoConfig, paths: Vec<PathBuf>) -> Result<()> {
     let sink_dir = application_config(conf)?;
     fs::create_dir_all(&sink_dir)?;
     for path in paths {
