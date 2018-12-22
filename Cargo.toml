@@ -1,7 +1,7 @@
 [package]
 name        = "cargo-launcher"
 edition     = "2018"
-version     = "0.1.0"
+version     = "0.2.0"
 authors     = ["Wataru Matsui <watawuwu@3bi.tech>"]
 license     = "MIT"
 description = "This CLI is a simple utility to register in lancher(alfred or hain)."
