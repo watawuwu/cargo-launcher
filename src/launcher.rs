@@ -2,6 +2,7 @@ use pretty_env_logger;
 use std::path::PathBuf;
 use structopt::clap::*;
 
+use crate::albert;
 use crate::alfred;
 use crate::args::Args;
 use crate::cargo::CargoConfig;
@@ -18,6 +19,7 @@ arg_enum! {
     pub enum Launcher {
         Alfred,
         Hain,
+        Albert,
     }
 }
 
@@ -50,6 +52,7 @@ pub fn launch(args: &Args, cargo_config: &CargoConfig) -> Result<()> {
     match args.launcher {
         Launcher::Alfred => alfred::install(&cargo_config, &launcher_config)?,
         Launcher::Hain => hain::install(&cargo_config, &launcher_config)?,
+        Launcher::Albert => albert::install(&cargo_config, &launcher_config)?,
     }
     Ok(())
 }

@@ -1,3 +1,4 @@
+mod albert;
 mod alfred;
 mod args;
 mod cargo;
