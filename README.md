@@ -8,6 +8,9 @@ If the cargo project is a binary crates, this tool can register the binary in th
     - Register as workflow
 - [Hain](https://hainproject.github.io/hain/docs/)
     - Register as devplugin
+- [Albert](https://albertlauncher.github.io/docs/extensions/python/)
+    - Register as Python extension
+
 
 ## TODO
 - [ ] cargo workspace(Only single binary crates)
@@ -15,9 +18,11 @@ If the cargo project is a binary crates, this tool can register the binary in th
 
 ## Usage
 
-### Alfred workflow
+### Common
 
-```
+- Install CLI binary
+
+``` shell
 $ cd {your binary crates project}
 
 # Install to local, or manually install
@@ -26,8 +31,13 @@ $ cd {your binary crates project}
 $ cargo install --path .
 ...
   Installing /Users/watawuwu/.cargo/bin/{your-binary}
+```
 
-# Export to Alfred
+### Alfred workflow
+
+- Generate Alfredworkflow file
+
+```
 $ cargo launcher alfred
 ```
 
@@ -39,19 +49,23 @@ $ cargo launcher alfred
 
 ### Hain plugin
 
+- Export to hain devplugin directory
+
 ```
-$ cd {your binary crates project}
-
-# Install to local, or manually install
-#   The script path is set as follows
-#   PATH=$HOME/.cargo/bin:$HOME/.local/bin:/usr/local/bin:$PATH
-$ cargo install --path .
-...
-  Installing /Users/watawuwu/.cargo/bin/{your-binary}
-
-# Export to hain devplugin
 $ cargo launcher hain
 ```
 
 - Restart Hain
 
+
+### Albert plugin
+
+- Export to albert module directory
+
+```
+$ cargo launcher albert
+```
+
+- Check the checkbox of the python extension list and activate the setting
+
+<img src="albert.png" width="300px"/>
