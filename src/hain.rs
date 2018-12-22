@@ -62,8 +62,10 @@ Installed path: "#;
 #[cfg(target_os = "macos")]
 fn application_config(cargo_conf: &CargoConfig) -> Result<PathBuf> {
     let mut path = dirs::home_dir().ok_or_else(|| err_msg("Notfound home dir"))?;
-    path.push("Library/Application Support");
-    path.push("hain-user/devplugins");
+    path.push("Library");
+    path.push("Application Support");
+    path.push("hain-user");
+    path.push("devplugins");
     path.push(plugin_name(cargo_conf.name()));
     Ok(path)
 }
