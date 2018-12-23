@@ -66,14 +66,31 @@ cross-test: ## Build all platform
 	-$(MAKE) test CARGO_SUB_OPTIONS="--target x86_64-pc-windows-gnu     --release"
 	-$(MAKE) test CARGO_SUB_OPTIONS="--target x86_64-unknown-linux-musl --release" CROSS_COMPILE="x86_64-linux-musl-"
 
+bump-patch: ## Bump up patch
+	$(MAKE) _bump BUMP_LEVEL=patch
+bump-minor: ## Bump up minor
+	$(MAKE) _bump BUMP_LEVEL=minor
+bump-major: ## Bump up major
+	$(MAKE) _bump BUMP_LEVEL=major
+
+_bump:
+	$(CARGO_COMMAND) bump $(BUMP_LEVEL)
+	$(CARGO_COMMAND) metadata --format-version 1  > /dev/null
+	git add Cargo.toml Cargo.lock
+	git commit -m "Bump up version number to $$($(CARGO_COMMAND) read-manifest | jq -r '.version')"
+
+publish: ## Publish to crates.io
+	$(CARGO_COMMAND) package
+	$(CARGO_COMMAND) publish
+
 help: ## Print help
 	echo -e "Usage: make [task]\n\nTasks:"
-	perl -nle 'printf("    \033[33m%-20s\033[0m %s\n",$$1,$$2) if /^([a-zA-Z_-]*?):(?:.+?## )?(.*?)$$/' $(MAKEFILE_LIST)
+	perl -nle 'printf("    \033[33m%s%-20s\033[0m %s\n",$$1,$$2,$$3) if /^([a-zA-Z]){1}([a-zA-Z_-]*?):(?:.+?## )?(.*?)$$/' $(MAKEFILE_LIST)
 
 # Config
 #===============================================================
 .SILENT: help
 # If you want `Target` instead of `Task`, you can avoid it by using dot(.) and slash(/)
 # ex) node_modules: => ./node_modules:
-.PHONY: $(shell egrep -o '^(\._)?[a-z_-]+:' $(MAKEFILE_LIST) | sed 's/://')
+.PHONY: $(shell egrep -o '^(_)?[a-zA-Z-]+:' $(MAKEFILE_LIST) | sed 's/://')
 .DEFAULT_GOAL := build
