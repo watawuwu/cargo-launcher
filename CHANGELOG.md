@@ -1,3 +1,11 @@
+<a name="0.2.1"></a>
+### 0.2.1 (2018-12-23)
+
+
+#### Bug
+
+* Fix to accept multiple arguments
+
 <a name="0.2.0"></a>
 ### 0.2.0 (2018-12-22)
 
