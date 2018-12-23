@@ -85,12 +85,12 @@ publish: ## Publish to crates.io
 
 help: ## Print help
 	echo -e "Usage: make [task]\n\nTasks:"
-	perl -nle 'printf("    \033[33m%-20s\033[0m %s\n",$$1,$$2) if /^([a-zA-Z_-]*?):(?:.+?## )?(.*?)$$/' $(MAKEFILE_LIST)
+	perl -nle 'printf("    \033[33m%s%-20s\033[0m %s\n",$$1,$$2,$$3) if /^([a-zA-Z]){1}([a-zA-Z_-]*?):(?:.+?## )?(.*?)$$/' $(MAKEFILE_LIST)
 
 # Config
 #===============================================================
 .SILENT: help
 # If you want `Target` instead of `Task`, you can avoid it by using dot(.) and slash(/)
 # ex) node_modules: => ./node_modules:
-.PHONY: $(shell egrep -o '^(\._)?[a-z_-]+:' $(MAKEFILE_LIST) | sed 's/://')
+.PHONY: $(shell egrep -o '^(_)?[a-zA-Z-]+:' $(MAKEFILE_LIST) | sed 's/://')
 .DEFAULT_GOAL := build
