@@ -1,33 +1,49 @@
-#[cfg(target_os = "macos")]
+use failure::bail;
 use std::fs::File;
-#[cfg(target_os = "macos")]
 use std::io::Write;
-#[cfg(target_os = "macos")]
 use std::path::{Path, PathBuf};
-#[cfg(target_os = "macos")]
 use zip::write::{FileOptions, ZipWriter};
 
 use crate::cargo::CargoConfig;
-#[cfg(target_os = "macos")]
 use crate::core::*;
 use crate::error::Result;
-use crate::launcher::LauncherConfig;
-#[cfg(target_os = "macos")]
+use crate::launcher::{LauncherConfig, LauncherLike};
 use crate::tpl::{self, Param};
 
-#[cfg(target_os = "macos")]
 const INFO_PLIST: &[u8] = include_bytes!("asset/alfred/info.plist");
-#[cfg(target_os = "macos")]
 const EXTENSION: &str = "alfredworkflow";
 
-#[cfg(target_os = "macos")]
+pub struct Alfred<'a> {
+    cargo_config: &'a CargoConfig,
+    launcher_config: &'a LauncherConfig,
+}
+
+impl<'a> Alfred<'a> {
+    pub fn new(cargo_config: &'a CargoConfig, launcher_config: &'a LauncherConfig) -> Alfred<'a> {
+        Alfred {
+            cargo_config,
+            launcher_config,
+        }
+    }
+}
+
+impl<'a> LauncherLike for Alfred<'a> {
+    fn install(&self) -> Result<()> {
+        if cfg!(not(target_os = "macos")) {
+            bail!("Alfred supported only macOS")
+        }
+        let workflow_path = make(self.cargo_config, self.launcher_config)?;
+        open(&[workflow_path.as_ref()])?;
+        Ok(())
+    }
+}
+
 pub fn install(cargo_conf: &CargoConfig, launcher_conf: &LauncherConfig) -> Result<()> {
     let workflow_path = make(cargo_conf, launcher_conf)?;
     open(&[workflow_path.as_ref()])?;
     Ok(())
 }
 
-#[cfg(target_os = "macos")]
 fn make(cargo_conf: &CargoConfig, launcher_conf: &LauncherConfig) -> Result<PathBuf> {
     let workflow_path = workflow_path(cargo_conf.name(), &launcher_conf.work_dir);
     let zip = File::create(&workflow_path)?;
@@ -46,7 +62,6 @@ fn make(cargo_conf: &CargoConfig, launcher_conf: &LauncherConfig) -> Result<Path
 }
 
 // TODO Install workflow via CUI or apple script.
-#[cfg(target_os = "macos")]
 fn open(paths: &[&Path]) -> Result<()> {
     let args = paths
         .iter()
@@ -56,13 +71,11 @@ fn open(paths: &[&Path]) -> Result<()> {
     Ok(())
 }
 
-#[cfg(target_os = "macos")]
 fn workflow_path(file_name: &str, dir_path: &PathBuf) -> PathBuf {
     let path = dir_path.to_str().unwrap_or("");
     PathBuf::from(format!("{}/{}.{}", path, file_name, EXTENSION))
 }
 
-#[cfg(target_os = "macos")]
 fn info_plist(config: &CargoConfig) -> Result<String> {
     let mut params = Param::new();
     params.insert("name", config.name());
@@ -74,9 +87,4 @@ fn info_plist(config: &CargoConfig) -> Result<String> {
     let info_plist = tpl::render(&tpl, &params)?;
 
     Ok(info_plist)
-}
-
-#[cfg(not(target_os = "macos"))]
-pub fn install(_cargo_conf: &CargoConfig, _launcher_conf: &LauncherConfig) -> Result<()> {
-    failure::bail!("Alfred supported only macOS")
 }

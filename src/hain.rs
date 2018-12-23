@@ -7,11 +7,33 @@ use std::path::PathBuf;
 use crate::cargo::CargoConfig;
 use crate::error::Result;
 use crate::fs::write_file;
-use crate::launcher::LauncherConfig;
+use crate::launcher::{LauncherConfig, LauncherLike};
 use crate::tpl::{self, Param};
 
 const INDEX_JS_BIN: &[u8] = include_bytes!("asset/hain/index.js");
 const PACKAGE_JSON_BIN: &[u8] = include_bytes!("asset/hain/package.json");
+
+pub struct Hain<'a> {
+    cargo_config: &'a CargoConfig,
+    launcher_config: &'a LauncherConfig,
+}
+
+impl<'a> Hain<'a> {
+    pub fn new(cargo_config: &'a CargoConfig, launcher_config: &'a LauncherConfig) -> Hain<'a> {
+        Hain {
+            cargo_config,
+            launcher_config,
+        }
+    }
+}
+
+impl<'a> LauncherLike for Hain<'a> {
+    fn install(&self) -> Result<()> {
+        let paths = make(self.cargo_config, self.launcher_config)?;
+        copy(self.cargo_config, paths)?;
+        Ok(())
+    }
+}
 
 pub fn install(cargo_conf: &CargoConfig, launch_conf: &LauncherConfig) -> Result<()> {
     let paths = make(cargo_conf, launch_conf)?;
