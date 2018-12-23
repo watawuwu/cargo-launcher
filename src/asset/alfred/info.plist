@@ -89,7 +89,7 @@ if [[ -z $query ]]
 then
   result=$({{name}})
 else
-  result=$({{name}} "$query")
+  result=$({{name}} $query)
 fi
 
 code=$?

@@ -15,8 +15,9 @@ module.exports = (pluginContext) => {
   function search(query, res) {
     logger.log('query: ' + query);
     logger.log('res: ' + res);
-    exec(`{{name}} "${query}"`, (err, stdout, stderr) => {
+    exec(`{{name}} ${query}`, (err, stdout, stderr) => {
       if (err) {
+        // todo show error
         logger.log(`error: ${err}`);
       }
       logger.log(`stdout: ${stdout}`);
