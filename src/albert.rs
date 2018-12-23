@@ -22,89 +22,88 @@ impl<'a> Albert<'a> {
             launcher_config,
         }
     }
+
+    fn application_config(&self) -> Result<PathBuf> {
+        let mut path = dirs::home_dir().ok_or_else(|| err_msg("Notfound home dir"))?;
+        path.push(".local/share/albert/org.albert.extension.python/modules");
+
+        path.push(self.cargo_config.name());
+        Ok(path)
+    }
+
+    // todo string to bytes
+    fn module_bin(&self) -> Result<String> {
+        let conf = self.cargo_config;
+        let mut params = Param::new();
+        params.insert("prettyname", conf.name());
+        params.insert("version", conf.version());
+        params.insert("trigger", conf.name());
+        params.insert("author", &conf.author());
+
+        let tpl = String::from_utf8_lossy(MODULE_TEMPLATE).into_owned();
+        let contents = tpl::render(&tpl, &params)?;
+
+        Ok(contents)
+    }
+
+    fn module_path(&self) -> PathBuf {
+        let mut buf = self.launcher_config.work_dir.clone();
+        buf.push("__init__.py");
+        buf
+    }
+
+    fn icon_path(&self) -> PathBuf {
+        let mut buf = self.launcher_config.work_dir.clone();
+        buf.push("icon.png");
+        buf
+    }
+
+    fn icon(&self) -> Result<Vec<u8>> {
+        self.launcher_config.icon(self.cargo_config)
+    }
 }
 
 impl<'a> LauncherLike for Albert<'a> {
-    fn install(&self) -> Result<()> {
+    fn before_check(&self) -> Result<()> {
         if cfg!(not(target_os = "linux")) {
             bail!("Albert supported only linux")
         }
-        let workflow_path = make(self.cargo_config, self.launcher_config)?;
-        copy(self.cargo_config, workflow_path)?;
         Ok(())
     }
-}
 
-pub fn install(cargo_conf: &CargoConfig, launcher_conf: &LauncherConfig) -> Result<()> {
-    let workflow_path = make(cargo_conf, launcher_conf)?;
-    copy(cargo_conf, workflow_path)?;
-    Ok(())
-}
+    fn gen(&self) -> Result<Vec<PathBuf>> {
+        let module = self.module_path();
+        write_file(&module, self.module_bin()?.as_bytes())?;
 
-fn make(cargo_conf: &CargoConfig, launcher_conf: &LauncherConfig) -> Result<Vec<PathBuf>> {
-    let module = module_path(&launcher_conf.work_dir)?;
-    write_file(&module, module_bin(cargo_conf)?.as_bytes())?;
+        let icon = self.icon_path();
+        write_file(&icon, &self.icon()?[..])?;
 
-    let icon = icon_path(&launcher_conf.work_dir)?;
-    write_file(&icon, &launcher_conf.icon(cargo_conf)?[..])?;
-
-    Ok(vec![module, icon])
-}
-
-fn module_bin(config: &CargoConfig) -> Result<String> {
-    let mut params = Param::new();
-    params.insert("prettyname", config.name());
-    params.insert("version", config.version());
-    params.insert("trigger", config.name());
-    params.insert("author", &config.author());
-
-    let tpl = String::from_utf8_lossy(MODULE_TEMPLATE).into_owned();
-    let contents = tpl::render(&tpl, &params)?;
-
-    Ok(contents)
-}
-
-fn copy(conf: &CargoConfig, paths: Vec<PathBuf>) -> Result<()> {
-    let sink_dir = application_config(conf)?;
-    fs::create_dir_all(&sink_dir)?;
-    for path in paths {
-        debug!("path: {:?}", &path);
-        debug!("sink: {:?}", &sink_dir);
-        let name = path.file_name().ok_or_else(|| err_msg("Not file type"))?;
-        let mut sink = sink_dir.clone();
-        sink.push(name);
-        fs::copy(&path, sink)?;
+        Ok(vec![module, icon])
     }
 
-    show_help(&sink_dir);
-    Ok(())
-}
+    fn deploy(&self, paths: Vec<PathBuf>) -> Result<()> {
+        let sink_dir = self.application_config()?;
+        fs::create_dir_all(&sink_dir)?;
+        for path in paths {
+            debug!("path: {:?}", &path);
+            debug!("sink: {:?}", &sink_dir);
+            let name = path.file_name().ok_or_else(|| err_msg("Not file type"))?;
+            let mut sink = sink_dir.clone();
+            sink.push(name);
+            fs::copy(&path, sink)?;
+        }
+        Ok(())
+    }
 
-fn show_help(path: &PathBuf) {
-    let msg = r#"
+    fn show_help(&self) -> Result<()> {
+        let msg = r#"
 Install completed!!
 Please check the checkbox of the python extension list and activate the setting.
 
 Installed path: "#;
-    println!("{}{}", msg, path.to_string_lossy());
-}
 
-fn application_config(cargo_conf: &CargoConfig) -> Result<PathBuf> {
-    let mut path = dirs::home_dir().ok_or_else(|| err_msg("Notfound home dir"))?;
-    path.push(".local/share/albert/org.albert.extension.python/modules");
-    path.push(cargo_conf.name());
-    Ok(path)
-}
-
-fn module_path(dir: &PathBuf) -> Result<PathBuf> {
-    path(dir, "__init__.py")
-}
-
-fn icon_path(dir: &PathBuf) -> Result<PathBuf> {
-    path(dir, "icon.png")
-}
-
-fn path(dir: &PathBuf, name: &str) -> Result<PathBuf> {
-    let dir_s = dir.to_str().ok_or_else(|| err_msg("NotFound dir path"))?;
-    Ok(PathBuf::from(format!("{}/{}", dir_s, name)))
+        let path = self.application_config()?;
+        println!("{}{}", msg, path.to_string_lossy());
+        Ok(())
+    }
 }

@@ -1,7 +1,7 @@
 use failure::bail;
 use std::fs::File;
 use std::io::Write;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use zip::write::{FileOptions, ZipWriter};
 
 use crate::cargo::CargoConfig;
@@ -25,66 +25,75 @@ impl<'a> Alfred<'a> {
             launcher_config,
         }
     }
-}
 
-impl<'a> LauncherLike for Alfred<'a> {
-    fn install(&self) -> Result<()> {
-        if cfg!(not(target_os = "macos")) {
-            bail!("Alfred supported only macOS")
-        }
-        let workflow_path = make(self.cargo_config, self.launcher_config)?;
-        open(&[workflow_path.as_ref()])?;
-        Ok(())
+    fn workflow_path(&self) -> PathBuf {
+        let name = self.cargo_config.name();
+        let dir = &self.launcher_config.work_dir;
+        let path = dir.to_str().unwrap_or("");
+        PathBuf::from(format!("{}/{}.{}", path, name, EXTENSION))
+    }
+
+    fn info_plist(&self) -> Result<String> {
+        let conf = self.cargo_config;
+        let mut params = Param::new();
+        params.insert("name", conf.name());
+        params.insert("description", conf.description());
+        params.insert("createdby", &conf.author());
+        params.insert("buildid", &conf.build_id());
+
+        let tpl = String::from_utf8_lossy(INFO_PLIST).into_owned();
+        let info_plist = tpl::render(&tpl, &params)?;
+
+        Ok(info_plist)
+    }
+
+    fn icon(&self) -> Result<Vec<u8>> {
+        self.launcher_config.icon(self.cargo_config)
     }
 }
 
-pub fn install(cargo_conf: &CargoConfig, launcher_conf: &LauncherConfig) -> Result<()> {
-    let workflow_path = make(cargo_conf, launcher_conf)?;
-    open(&[workflow_path.as_ref()])?;
-    Ok(())
-}
+impl<'a> LauncherLike for Alfred<'a> {
+    fn before_check(&self) -> Result<()> {
+        if cfg!(not(target_os = "macos")) {
+            bail!("Alfred supported only macOS")
+        }
+        Ok(())
+    }
 
-fn make(cargo_conf: &CargoConfig, launcher_conf: &LauncherConfig) -> Result<PathBuf> {
-    let workflow_path = workflow_path(cargo_conf.name(), &launcher_conf.work_dir);
-    let zip = File::create(&workflow_path)?;
-    let mut writer = ZipWriter::new(zip);
-    let options = FileOptions::default();
+    fn gen(&self) -> Result<Vec<PathBuf>> {
+        let workflow_path = self.workflow_path();
+        let zip = File::create(&workflow_path)?;
+        let mut writer = ZipWriter::new(zip);
+        let options = FileOptions::default();
 
-    writer.start_file("info.plist", options)?;
-    let info_plist = info_plist(&cargo_conf)?;
-    writer.write_all(info_plist.as_bytes())?;
+        writer.start_file("info.plist", options)?;
+        let info_plist = self.info_plist()?;
+        writer.write_all(info_plist.as_bytes())?;
 
-    writer.start_file("icon.png", options)?;
-    writer.write_all(&launcher_conf.icon(cargo_conf)?)?;
+        writer.start_file("icon.png", options)?;
+        writer.write_all(&self.icon()?)?;
 
-    writer.finish()?;
-    Ok(workflow_path)
-}
+        writer.finish()?;
+        Ok(vec![workflow_path])
+    }
 
-// TODO Install workflow via CUI or apple script.
-fn open(paths: &[&Path]) -> Result<()> {
-    let args = paths
-        .iter()
-        .map(|f| f.to_str().unwrap_or(""))
-        .collect::<Vec<&str>>();
-    let _ = command("open", Some(args))?;
-    Ok(())
-}
+    fn deploy(&self, paths: Vec<PathBuf>) -> Result<()> {
+        let args = paths
+            .iter()
+            .map(|f| f.to_str().unwrap_or(""))
+            .collect::<Vec<&str>>();
+        let _ = command("open", Some(args))?;
+        Ok(())
+    }
 
-fn workflow_path(file_name: &str, dir_path: &PathBuf) -> PathBuf {
-    let path = dir_path.to_str().unwrap_or("");
-    PathBuf::from(format!("{}/{}.{}", path, file_name, EXTENSION))
-}
+    fn show_help(&self) -> Result<()> {
+        let msg = r#"
+Install completed!!
 
-fn info_plist(config: &CargoConfig) -> Result<String> {
-    let mut params = Param::new();
-    params.insert("name", config.name());
-    params.insert("description", config.description());
-    params.insert("createdby", &config.author());
-    params.insert("buildid", &config.build_id());
-
-    let tpl = String::from_utf8_lossy(INFO_PLIST).into_owned();
-    let info_plist = tpl::render(&tpl, &params)?;
-
-    Ok(info_plist)
+Note:
+Powerpack is necessary to use Alfred workflow.
+"#;
+        println!("{}", msg);
+        Ok(())
+    }
 }
