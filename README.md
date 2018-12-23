@@ -1,6 +1,9 @@
 # cargo-launcher
 
 [![Build Status](https://travis-ci.com/watawuwu/cargo-launcher.svg?branch=master)](https://travis-ci.com/watawuwu/cargo-launcher)
+[![Latest version](https://img.shields.io/crates/v/cargo-launcher.svg)](https://crates.io/crates/cargo-launcher)
+[![Documentation](https://docs.rs/cargo-launcher/badge.svg)](https://docs.rs/crate/cargo-launcher)
+![License](https://img.shields.io/crates/l/cargo-launcher.svg)
 
 If the cargo project is a binary crates, this tool can register the binary in the following launcher.
 
@@ -10,7 +13,6 @@ If the cargo project is a binary crates, this tool can register the binary in th
     - Register as devplugin
 - [Albert](https://albertlauncher.github.io/docs/extensions/python/)
     - Register as Python extension
-
 
 ## TODO
 - [ ] cargo workspace(Only single binary crates)
