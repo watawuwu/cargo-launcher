@@ -14,15 +14,34 @@ If the cargo project is a binary crates, this tool can register the binary in th
 - [Albert](https://albertlauncher.github.io/docs/extensions/python/)
     - Register as Python extension
 
-## TODO
-- [ ] cargo workspace(Only single binary crates)
-- [ ] customize launcher scripts
+## Demo
+Alfred:
+![Preview](https://camo.qiitausercontent.com/4f154fa67b49cd18cc69188d1871e8dba9603e9a/68747470733a2f2f6d656469612e67697068792e636f6d2f6d656469612f3535353449473062524a68327830357a52492f67697068792e676966)
+
+
+## Installation
+cargo-launcher can be installed with cargo install:
+
+``` shell
+$ cargo install cargo-launcher
+```
+
+To upgrade:
+
+``` shell
+$ cargo install --force cargo-launcher
+```
+
+The resulting binary should then be in $HOME/.cargo/bin.
+
+Or download binary from [gthub release page](https://github.com/watawuwu/cargo-launcher/releases).
+
 
 ## Usage
 
 ### Common
 
-- Install CLI binary
+- Install target CLI binary(not cargo-launcher)
 
 ``` shell
 $ cd {your binary crates project}

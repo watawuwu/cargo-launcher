@@ -12,7 +12,7 @@ CARGO_VERSION           := stable
 CARGO_OPTIONS           :=
 CARGO_SUB_OPTIONS       :=
 CARGO_COMMAND           := cargo +$(CARGO_VERSION) $(CARGO_OPTIONS)
-APP_ARGS                := launcher albert
+APP_ARGS                := launcher alfred
 
 # Environment
 #===============================================================

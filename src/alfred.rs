@@ -1,82 +1,99 @@
-#[cfg(target_os = "macos")]
+use failure::bail;
 use std::fs::File;
-#[cfg(target_os = "macos")]
 use std::io::Write;
-#[cfg(target_os = "macos")]
-use std::path::{Path, PathBuf};
-#[cfg(target_os = "macos")]
+use std::path::PathBuf;
 use zip::write::{FileOptions, ZipWriter};
 
 use crate::cargo::CargoConfig;
-#[cfg(target_os = "macos")]
 use crate::core::*;
 use crate::error::Result;
-use crate::launcher::LauncherConfig;
-#[cfg(target_os = "macos")]
+use crate::launcher::{LauncherConfig, LauncherLike};
 use crate::tpl::{self, Param};
 
-#[cfg(target_os = "macos")]
 const INFO_PLIST: &[u8] = include_bytes!("asset/alfred/info.plist");
-#[cfg(target_os = "macos")]
 const EXTENSION: &str = "alfredworkflow";
 
-#[cfg(target_os = "macos")]
-pub fn install(cargo_conf: &CargoConfig, launcher_conf: &LauncherConfig) -> Result<()> {
-    let workflow_path = make(cargo_conf, launcher_conf)?;
-    open(&[workflow_path.as_ref()])?;
-    Ok(())
+pub struct Alfred<'a> {
+    cargo_config: &'a CargoConfig,
+    launcher_config: &'a LauncherConfig,
 }
 
-#[cfg(target_os = "macos")]
-fn make(cargo_conf: &CargoConfig, launcher_conf: &LauncherConfig) -> Result<PathBuf> {
-    let workflow_path = workflow_path(cargo_conf.name(), &launcher_conf.work_dir);
-    let zip = File::create(&workflow_path)?;
-    let mut writer = ZipWriter::new(zip);
-    let options = FileOptions::default();
+impl<'a> Alfred<'a> {
+    pub fn new(cargo_config: &'a CargoConfig, launcher_config: &'a LauncherConfig) -> Alfred<'a> {
+        Alfred {
+            cargo_config,
+            launcher_config,
+        }
+    }
 
-    writer.start_file("info.plist", options)?;
-    let info_plist = info_plist(&cargo_conf)?;
-    writer.write_all(info_plist.as_bytes())?;
+    fn workflow_path(&self) -> PathBuf {
+        let name = self.cargo_config.name();
+        let dir = &self.launcher_config.work_dir;
+        let path = dir.to_str().unwrap_or("");
+        PathBuf::from(format!("{}/{}.{}", path, name, EXTENSION))
+    }
 
-    writer.start_file("icon.png", options)?;
-    writer.write_all(&launcher_conf.icon(cargo_conf)?)?;
+    fn info_plist(&self) -> Result<String> {
+        let conf = self.cargo_config;
+        let mut params = Param::new();
+        params.insert("name", conf.name());
+        params.insert("description", conf.description());
+        params.insert("createdby", &conf.author());
+        params.insert("buildid", &conf.build_id());
 
-    writer.finish()?;
-    Ok(workflow_path)
+        let tpl = String::from_utf8_lossy(INFO_PLIST).into_owned();
+        let info_plist = tpl::render(&tpl, &params)?;
+
+        Ok(info_plist)
+    }
+
+    fn icon(&self) -> Result<Vec<u8>> {
+        self.launcher_config.icon(self.cargo_config)
+    }
 }
 
-// TODO Install workflow via CUI or apple script.
-#[cfg(target_os = "macos")]
-fn open(paths: &[&Path]) -> Result<()> {
-    let args = paths
-        .iter()
-        .map(|f| f.to_str().unwrap_or(""))
-        .collect::<Vec<&str>>();
-    let _ = command("open", Some(args))?;
-    Ok(())
-}
+impl<'a> LauncherLike for Alfred<'a> {
+    fn before_check(&self) -> Result<()> {
+        if cfg!(not(target_os = "macos")) {
+            bail!("Alfred supported only macOS")
+        }
+        Ok(())
+    }
 
-#[cfg(target_os = "macos")]
-fn workflow_path(file_name: &str, dir_path: &PathBuf) -> PathBuf {
-    let path = dir_path.to_str().unwrap_or("");
-    PathBuf::from(format!("{}/{}.{}", path, file_name, EXTENSION))
-}
+    fn gen(&self) -> Result<Vec<PathBuf>> {
+        let workflow_path = self.workflow_path();
+        let zip = File::create(&workflow_path)?;
+        let mut writer = ZipWriter::new(zip);
+        let options = FileOptions::default();
 
-#[cfg(target_os = "macos")]
-fn info_plist(config: &CargoConfig) -> Result<String> {
-    let mut params = Param::new();
-    params.insert("name", config.name());
-    params.insert("description", config.description());
-    params.insert("createdby", &config.author());
-    params.insert("buildid", &config.build_id());
+        writer.start_file("info.plist", options)?;
+        let info_plist = self.info_plist()?;
+        writer.write_all(info_plist.as_bytes())?;
 
-    let tpl = String::from_utf8_lossy(INFO_PLIST).into_owned();
-    let info_plist = tpl::render(&tpl, &params)?;
+        writer.start_file("icon.png", options)?;
+        writer.write_all(&self.icon()?)?;
 
-    Ok(info_plist)
-}
+        writer.finish()?;
+        Ok(vec![workflow_path])
+    }
 
-#[cfg(not(target_os = "macos"))]
-pub fn install(_cargo_conf: &CargoConfig, _launcher_conf: &LauncherConfig) -> Result<()> {
-    failure::bail!("Alfred supported only macOS")
+    fn deploy(&self, paths: Vec<PathBuf>) -> Result<()> {
+        let args = paths
+            .iter()
+            .map(|f| f.to_str().unwrap_or(""))
+            .collect::<Vec<&str>>();
+        let _ = command("open", Some(args))?;
+        Ok(())
+    }
+
+    fn show_help(&self) -> Result<()> {
+        let msg = r#"
+Install completed!!
+
+Note:
+Powerpack is necessary to use Alfred workflow.
+"#;
+        println!("{}", msg);
+        Ok(())
+    }
 }
