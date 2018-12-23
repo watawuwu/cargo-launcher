@@ -10,7 +10,6 @@ use crate::error::Result;
 use crate::fs::*;
 use crate::hain::Hain;
 
-// @FIXME from metadata and rel2abs
 const WORK_PATH: &str = "target/launcher";
 const ICON_BIN: &[u8] = include_bytes!("asset/icon.png");
 
@@ -57,22 +56,19 @@ impl LauncherConfig {
 }
 
 pub trait LauncherLike {
-    // TODO Result<()> => Result<String>
-    fn install(&self) -> Result<()> {
+    fn install(&self) -> Result<String> {
         self.before_check()?;
         let artifacts = self.gen()?;
         self.deploy(artifacts)?;
-        self.show_help()
+        self.completed_message()
     }
     fn before_check(&self) -> Result<()>;
     fn gen(&self) -> Result<Vec<PathBuf>>;
     fn deploy(&self, paths: Vec<PathBuf>) -> Result<()>;
-
-    // @TODO return string
-    fn show_help(&self) -> Result<()>;
+    fn completed_message(&self) -> Result<String>;
 }
 
-pub fn launch(args: &Args, cargo_config: &CargoConfig) -> Result<()> {
+pub fn launch(args: &Args, cargo_config: &CargoConfig) -> Result<String> {
     let launcher_config = LauncherConfig {
         work_dir: PathBuf::from(WORK_PATH),
         icon_bin: ICON_BIN,
@@ -80,6 +76,5 @@ pub fn launch(args: &Args, cargo_config: &CargoConfig) -> Result<()> {
     launcher_config.mk_dir()?;
 
     let launcher = args.launcher.instance(cargo_config, &launcher_config);
-    launcher.install()?;
-    Ok(())
+    Ok(launcher.install()?)
 }

@@ -28,7 +28,10 @@ fn main() -> Result<()> {
     let config = config(&None)?;
 
     match launch(&args, &config) {
-        Ok(_) => exit(SUCCESS_CODE),
+        Ok(msg) => {
+            println!("{}", msg);
+            exit(SUCCESS_CODE)
+        }
         Err(err) => {
             eprintln!("Error occurred: {}", err);
             exit(FAILED_CODE);

@@ -148,14 +148,13 @@ impl<'a> LauncherLike for Hain<'a> {
         Ok(())
     }
 
-    fn show_help(&self) -> Result<()> {
+    fn completed_message(&self) -> Result<String> {
         let msg = r#"
 Install completed!!
 Restart of the hain is required.
 
 Installed path: "#;
         let path = self.application_config()?;
-        println!("{}{}", msg, path.to_string_lossy());
-        Ok(())
+        Ok(format!("{}{}", msg, path.to_string_lossy()))
     }
 }

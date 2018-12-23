@@ -86,14 +86,14 @@ impl<'a> LauncherLike for Alfred<'a> {
         Ok(())
     }
 
-    fn show_help(&self) -> Result<()> {
+    fn completed_message(&self) -> Result<String> {
         let msg = r#"
 Install completed!!
 
 Note:
 Powerpack is necessary to use Alfred workflow.
 "#;
-        println!("{}", msg);
-        Ok(())
+
+        Ok(msg.to_string())
     }
 }
