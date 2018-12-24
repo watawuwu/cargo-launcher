@@ -31,7 +31,6 @@ impl<'a> Albert<'a> {
         Ok(path)
     }
 
-    // todo string to bytes
     fn module_bin(&self) -> Result<String> {
         let conf = self.cargo_config;
         let mut params = Param::new();
@@ -95,7 +94,7 @@ impl<'a> LauncherLike for Albert<'a> {
         Ok(())
     }
 
-    fn show_help(&self) -> Result<()> {
+    fn completed_message(&self) -> Result<String> {
         let msg = r#"
 Install completed!!
 Please check the checkbox of the python extension list and activate the setting.
@@ -103,7 +102,6 @@ Please check the checkbox of the python extension list and activate the setting.
 Installed path: "#;
 
         let path = self.application_config()?;
-        println!("{}{}", msg, path.to_string_lossy());
-        Ok(())
+        Ok(format!("{}{}", msg, path.to_string_lossy()))
     }
 }
