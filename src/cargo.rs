@@ -111,7 +111,7 @@ readme      = "README.md"
 
     #[test]
     fn config_bore_ok() {
-        let tmp_dir = TempDir::new("").unwrap();
+        let tmp_dir = TempDir::new("config_bore_ok").unwrap();
         let cargo_file = create_tmp_project(&tmp_dir, DUMMY_CARGO);
 
         let cargo = config(&Some(cargo_file)).unwrap();
@@ -127,7 +127,7 @@ readme      = "README.md"
 
     #[test]
     fn config_icon_ok() {
-        let tmp_dir = TempDir::new("").unwrap();
+        let tmp_dir = TempDir::new("config_icon_ok").unwrap();
         let dummy = format!(
             "{}{}",
             DUMMY_CARGO, "[package.metadata.launcher]\nicon=\"test.png\"\n"
