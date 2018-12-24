@@ -80,7 +80,6 @@ mod tests {
 
     use crate::cargo::*;
     use crate::fs::write_file;
-    use std::env;
     use std::fs;
     use std::path::PathBuf;
     use tempdir::TempDir;
@@ -100,8 +99,8 @@ readme      = "README.md"
     const DUMMY_MAIN: &str = r##"fn main() { println!("test"); }"##;
 
     fn create_tmp_project(tmp_dir: &TempDir, toml: &str) -> PathBuf {
-        env::set_current_dir(&tmp_dir).unwrap();
-        fs::create_dir("src").unwrap();
+        let dir = tmp_dir.path().join("src");
+        fs::create_dir(dir).unwrap();
         let cargo_file = tmp_dir.path().join("Cargo.toml");
         write_file(&cargo_file, toml.as_bytes()).unwrap();
         let dummy_main = tmp_dir.path().join("src/main.rs");
