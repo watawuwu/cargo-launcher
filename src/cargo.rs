@@ -59,7 +59,7 @@ fn cargo_exec(sub: Vec<&str>) -> Result<String> {
     Ok(r)
 }
 
-pub fn config(opt_path: &Option<PathBuf>) -> Result<CargoConfig> {
+pub fn config(opt_path: &Option<PathBuf>, name: Option<&str>) -> Result<CargoConfig> {
     let mut args = vec!["read-manifest"];
 
     if let Some(path) = opt_path {
@@ -70,7 +70,14 @@ pub fn config(opt_path: &Option<PathBuf>) -> Result<CargoConfig> {
     }
 
     let output = cargo_exec(args)?;
-    let config: CargoConfig = serde_json::from_str(output.as_str())?;
+    let raw_config: CargoConfig = serde_json::from_str(output.as_str())?;
+    let config = match name {
+        Some(n) => CargoConfig {
+            name: n.to_owned(),
+            ..raw_config
+        },
+        None => raw_config,
+    };
     Ok(config)
 }
 
@@ -113,7 +120,7 @@ readme      = "README.md"
         let tmp_dir = TempDir::new("config_bore_ok").unwrap();
         let cargo_file = create_tmp_project(&tmp_dir, DUMMY_CARGO);
 
-        let cargo = config(&Some(cargo_file)).unwrap();
+        let cargo = config(&Some(cargo_file), None).unwrap();
 
         assert_eq!(cargo.name(), "test-cargo");
         assert_eq!(cargo.version(), "0.1.0");
@@ -132,9 +139,20 @@ readme      = "README.md"
             DUMMY_CARGO, "[package.metadata.launcher]\nicon=\"test.png\"\n"
         );
         let cargo_file = create_tmp_project(&tmp_dir, &dummy);
-        let cargo = config(&Some(cargo_file)).unwrap();
+        let cargo = config(&Some(cargo_file), None).unwrap();
         let icon_path = cargo.icon_path();
         assert!(icon_path.is_some());
         assert_eq!(icon_path.unwrap().to_string_lossy().as_ref(), "test.png");
     }
+
+    #[test]
+    fn config_change_name_ok() {
+        let expected = "test_bin";
+        let tmp_dir = TempDir::new("config_icon_ok").unwrap();
+        let cargo_file = create_tmp_project(&tmp_dir, DUMMY_CARGO);
+        let cargo = config(&Some(cargo_file), Some(expected)).unwrap();
+        let name = cargo.name();
+        assert_eq!(name, expected);
+    }
+
 }
