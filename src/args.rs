@@ -10,6 +10,8 @@ enum Command {
 
 #[derive(StructOpt, Debug)]
 pub struct Args {
+    #[structopt(short = "b", long = "bin")]
+    pub bin_name: Option<String>,
     #[structopt(name = "launcher")]
     pub launcher: Launcher,
 }
