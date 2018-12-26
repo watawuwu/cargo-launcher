@@ -91,3 +91,23 @@ $ cargo launcher albert
 - Check the checkbox of the python extension list and activate the setting
 
 <img src="albert.png" width="300px"/>
+
+### Option
+
+```
+This CLI is a simple utility to register in lancher(alfred or hain).
+
+USAGE:
+    cargo launcher [OPTIONS] <launcher>
+
+FLAGS:
+    -h, --help       Prints help information
+    -V, --version    Prints version information
+
+OPTIONS:
+    -b, --bin <bin_name>
+
+ARGS:
+    <launcher>
+```
+
