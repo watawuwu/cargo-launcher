@@ -16,6 +16,7 @@ If the cargo project is a binary crates, this tool can register the binary in th
 
 ## Demo
 Alfred:
+
 ![Preview](https://camo.qiitausercontent.com/4f154fa67b49cd18cc69188d1871e8dba9603e9a/68747470733a2f2f6d656469612e67697068792e636f6d2f6d656469612f3535353449473062524a68327830357a52492f67697068792e676966)
 
 
