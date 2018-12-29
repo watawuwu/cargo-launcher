@@ -1,4 +1,5 @@
 use crate::launcher::Launcher;
+use std::path::PathBuf;
 use structopt::*;
 
 #[derive(StructOpt)]
@@ -12,6 +13,8 @@ enum Command {
 pub struct Args {
     #[structopt(short = "b", long = "bin")]
     pub bin_name: Option<String>,
+    #[structopt(short = "i", long = "icon", parse(from_os_str))]
+    pub icon_path: Option<PathBuf>,
     #[structopt(name = "launcher")]
     pub launcher: Launcher,
 }

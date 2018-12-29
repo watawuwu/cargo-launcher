@@ -9,7 +9,7 @@ pub struct CargoConfig {
     name: String,
     version: String,
     description: Option<String>,
-    metadata: Option<Metadata>,
+    icon: Option<PathBuf>,
     authors: Option<Vec<String>>,
 }
 
@@ -33,14 +33,6 @@ impl CargoConfig {
 
     pub fn build_id(&self) -> String {
         format!("{}-{}", self.name(), hash(self.name()))
-    }
-
-    pub fn icon_path(&self) -> Option<PathBuf> {
-        if let Some(ref metadata) = self.metadata {
-            metadata.launcher.icon.clone()
-        } else {
-            None
-        }
     }
 }
 
@@ -128,21 +120,6 @@ readme      = "README.md"
         assert_eq!(cargo.author(), "mozilla, watawuwu");
         #[cfg(target_os = "macos")]
         assert_eq!(cargo.build_id(), "test-cargo-5484037434785666097");
-        assert!(cargo.icon_path().is_none());
-    }
-
-    #[test]
-    fn config_icon_ok() {
-        let tmp_dir = TempDir::new("config_icon_ok").unwrap();
-        let dummy = format!(
-            "{}{}",
-            DUMMY_CARGO, "[package.metadata.launcher]\nicon=\"test.png\"\n"
-        );
-        let cargo_file = create_tmp_project(&tmp_dir, &dummy);
-        let cargo = config(&Some(cargo_file), None).unwrap();
-        let icon_path = cargo.icon_path();
-        assert!(icon_path.is_some());
-        assert_eq!(icon_path.unwrap().to_string_lossy().as_ref(), "test.png");
     }
 
     #[test]

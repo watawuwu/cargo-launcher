@@ -15,7 +15,7 @@ const EXTENSION: &str = "alfredworkflow";
 
 pub struct Alfred<'a> {
     cargo_config: &'a CargoConfig,
-    launcher_config: &'a LauncherConfig,
+    launcher_config: &'a LauncherConfig<'a>,
 }
 
 impl<'a> Alfred<'a> {
@@ -48,7 +48,7 @@ impl<'a> Alfred<'a> {
     }
 
     fn icon(&self) -> Result<Vec<u8>> {
-        self.launcher_config.icon(self.cargo_config)
+        self.launcher_config.icon()
     }
 }
 

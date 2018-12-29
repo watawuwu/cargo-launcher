@@ -35,16 +35,16 @@ impl Launcher {
     }
 }
 
-pub struct LauncherConfig {
+pub struct LauncherConfig<'a> {
     pub work_dir: PathBuf,
-    icon_bin: &'static [u8],
+    icon_path: Option<&'a PathBuf>,
 }
 
-impl LauncherConfig {
-    pub fn icon(&self, cargo_conf: &CargoConfig) -> Result<Vec<u8>> {
-        let r = match cargo_conf.icon_path() {
-            Some(ref path) => read_file(&path)?,
-            None => self.icon_bin.to_vec(),
+impl<'a> LauncherConfig<'a> {
+    pub fn icon(&self) -> Result<Vec<u8>> {
+        let r = match self.icon_path {
+            Some(path) => read_file(path)?,
+            None => ICON_BIN.to_vec(),
         };
         Ok(r)
     }
@@ -71,10 +71,80 @@ pub trait LauncherLike {
 pub fn launch(args: &Args, cargo_config: &CargoConfig) -> Result<String> {
     let launcher_config = LauncherConfig {
         work_dir: PathBuf::from(WORK_PATH),
-        icon_bin: ICON_BIN,
+        icon_path: args.icon_path.as_ref(),
     };
     launcher_config.mk_dir()?;
 
     let launcher = args.launcher.instance(cargo_config, &launcher_config);
     Ok(launcher.install()?)
+}
+
+#[cfg(test)]
+mod tests {
+
+    use crate::fs::write_file;
+    use crate::launcher::*;
+    use std::fs;
+    use std::path::PathBuf;
+    use tempdir::TempDir;
+
+    #[test]
+    fn mk_dir_bore_ok() {
+        let tmp_dir = TempDir::new("mk_dir_bore_ok").unwrap();
+        let dir = tmp_dir.path().join("work_dir");
+        let conf = LauncherConfig {
+            work_dir: dir.clone(),
+            icon_path: None,
+        };
+
+        let r = conf.mk_dir();
+        assert!(r.is_ok());
+        assert!(dir.exists());
+    }
+
+    #[test]
+    fn icon_none_ok() {
+        let tmp_dir = TempDir::new("icon_none_ok").unwrap();
+        let dir = tmp_dir.path().join("work_dir");
+        let conf = LauncherConfig {
+            work_dir: dir.clone(),
+            icon_path: None,
+        };
+
+        let r = conf.icon();
+        assert!(r.is_ok());
+        assert_eq!(r.unwrap(), ICON_BIN.to_vec());
+    }
+
+    #[test]
+    fn icon_some_ok() {
+        let tmp_dir = TempDir::new("icon_some_ok").unwrap();
+        let dir = tmp_dir.path().join("work_dir");
+        fs::create_dir_all(&dir).unwrap();
+        let path = dir.join("test-icon.png");
+        write_file(path, vec![1u8].as_slice()).unwrap();
+        let conf = LauncherConfig {
+            work_dir: dir.clone(),
+            icon_path: None,
+        };
+
+        let r = conf.icon();
+        assert!(r.is_ok());
+        assert_eq!(r.unwrap(), ICON_BIN.to_vec());
+    }
+
+    #[test]
+    fn icon_notfound_ng() {
+        let tmp_dir = TempDir::new("icon_notfound_ng").unwrap();
+        let dir = tmp_dir.path().join("work_dir");
+        let path = PathBuf::from("notfound-icon-path");
+        let conf = LauncherConfig {
+            work_dir: dir.clone(),
+            icon_path: Some(&path),
+        };
+
+        let r = conf.icon();
+        assert!(r.is_err());
+    }
+
 }
