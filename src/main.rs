@@ -25,7 +25,8 @@ fn main() -> Result<()> {
     pretty_env_logger::init();
     let args = args();
     debug!("args: {:?}", args);
-    let config = config(&None, args.bin_name.as_ref().map(String::as_str))?;
+    let name = args.bin_name.as_ref().map(String::as_str);
+    let config = config(&None, name)?;
 
     match launch(&args, &config) {
         Ok(msg) => {
