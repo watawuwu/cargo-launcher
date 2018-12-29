@@ -12,7 +12,7 @@ const MODULE_TEMPLATE: &[u8] = include_bytes!("asset/albert/__init__.py");
 
 pub struct Albert<'a> {
     cargo_config: &'a CargoConfig,
-    launcher_config: &'a LauncherConfig,
+    launcher_config: &'a LauncherConfig<'a>,
 }
 
 impl<'a> Albert<'a> {
@@ -58,7 +58,7 @@ impl<'a> Albert<'a> {
     }
 
     fn icon(&self) -> Result<Vec<u8>> {
-        self.launcher_config.icon(self.cargo_config)
+        self.launcher_config.icon()
     }
 }
 

@@ -15,7 +15,7 @@ const PACKAGE_JSON_BIN: &[u8] = include_bytes!("asset/hain/package.json");
 
 pub struct Hain<'a> {
     cargo_config: &'a CargoConfig,
-    launcher_config: &'a LauncherConfig,
+    launcher_config: &'a LauncherConfig<'a>,
 }
 
 impl<'a> Hain<'a> {
@@ -112,7 +112,7 @@ impl<'a> Hain<'a> {
     }
 
     fn icon(&self) -> Result<Vec<u8>> {
-        self.launcher_config.icon(self.cargo_config)
+        self.launcher_config.icon()
     }
 }
 
