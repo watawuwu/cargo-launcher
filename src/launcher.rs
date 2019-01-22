@@ -1,4 +1,3 @@
-use pretty_env_logger;
 use std::path::PathBuf;
 use structopt::clap::*;
 
