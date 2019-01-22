@@ -4,7 +4,7 @@ edition     = "2018"
 version     = "0.4.0"
 authors     = ["Wataru Matsui <watawuwu@3bi.tech>"]
 license     = "MIT"
-description = "This CLI is a simple utility to register in lancher(alfred or hain)."
+description = "This CLI is a simple utility to register in lancher(alfred|hain|albert)."
 repository  = "https://github.com/watawuwu/cargo-launcher"
 readme      = "README.md"
 
