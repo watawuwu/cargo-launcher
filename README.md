@@ -106,6 +106,7 @@ FLAGS:
 
 OPTIONS:
     -b, --bin <bin_name>
+    -i, --icon <icon_path>
 
 ARGS:
     <launcher>
