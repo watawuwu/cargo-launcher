@@ -131,7 +131,7 @@ dependencies = [
 
 [[package]]
 name = "cargo-launcher"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "dirs 1.0.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
